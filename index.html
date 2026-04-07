@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groubee, Agente de Conteúdo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #F7F7F4; min-height: 100vh; padding: 28px 16px; }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  .badge { display: inline-block; background: #0A0F2C; color: #FFC703; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 6px; letter-spacing: 1px; margin-bottom: 8px; }
+  .title { font-size: 22px; font-weight: 800; color: #0A0F2C; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .card { background: #fff; border: 1px solid #E5E5E0; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
+  .lbl { font-size: 11px; font-weight: 700; color: #888; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .lbl-mt { margin-top: 14px; }
+  select, textarea, input[type=text] { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #E5E5E0; font-size: 13px; background: #fff; color: #0A0F2C; outline: none; font-family: Arial, sans-serif; }
+  textarea { resize: vertical; line-height: 1.6; }
+  .modo-row { display: flex; gap: 8px; }
+  .modo-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1.5px solid #E5E5E0; background: #fff; color: #0A0F2C; transition: all 0.15s; }
+  .modo-btn.ativo { background: #0A0F2C; color: #FFC703; border-color: #0A0F2C; }
+  .gerar-btn { width: 100%; padding: 13px; background: #FFC703; color: #0A0F2C; font-size: 14px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 12px; font-family: Arial, sans-serif; }
+  .gerar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .erro { background: #FDF2F2; border: 1px solid #F5C6C6; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #C0392B; margin-bottom: 12px; display: none; }
+  .res-card { background: #fff; border: 1px solid #E5E5E0; border-left: 4px solid #FFC703; border-radius: 12px; padding: 20px; display: none; }
+  .res-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #F0F0EE; }
+  .res-lbl { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .act-btn { font-size: 12px; padding: 5px 12px; border-radius: 7px; border: 1px solid #E5E5E0; background: #fff; color: #444; cursor: pointer; margin-left: 6px; font-family: Arial, sans-serif; }
+  .act-btn.ok { background: #E8F5E9; border-color: #A5D6A7; color: #2E7D32; }
+  .bloco-tag { display: inline-block; background: #0A0F2C; color: #FFC703; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 6px; margin: 10px 0 6px; }
+  .slide-tag { display: inline-block; background: #E3F2FD; color: #0D47A1; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 6px; margin: 10px 0 6px; }
+  .instrucao { background: #EEF0F8; border-left: 2px solid #0A0F2C; padding: 7px 12px; border-radius: 0 6px 6px 0; font-size: 12px; color: #555; font-style: italic; margin-bottom: 6px; line-height: 1.6; }
+  .fala { background: #FFFDF0; border-left: 3px solid #FFC703; padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 13px; color: #111; line-height: 1.85; margin-bottom: 6px; }
+  .meta { font-size: 11px; font-weight: 700; color: #FFC703; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+  .tit { font-size: 13px; font-weight: 700; color: #0A0F2C; margin-bottom: 3px; }
+  .corpo { font-size: 13px; color: #333; line-height: 1.7; margin-bottom: 4px; }
+  .gap { height: 6px; }
+  .rodape { font-size: 11px; color: #bbb; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge">GROUBEE</div>
+  <div class="title">Agente de Conteúdo B2B</div>
+  <div class="sub">Roteiros de Reels e Carrosséis no padrão aprovado pela Groubee</div>
+
+  <div class="card">
+    <span class="lbl">Tipo de conteúdo</span>
+    <div class="modo-row">
+      <button class="modo-btn ativo" id="btnReel" onclick="setModo('reel')">Roteiro de Reel (60s)</button>
+      <button class="modo-btn" id="btnCarrossel" onclick="setModo('carrossel')">Carrossel</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Tema</span>
+    <select id="temaSelect" onchange="onTema()">
+      <option value="">Selecione um tema...</option>
+      <option>Fluxo de Caixa</option>
+      <option>Contas a Pagar e Receber</option>
+      <option>Conciliação Bancária</option>
+      <option>Capital de Giro</option>
+      <option>Inadimplência</option>
+      <option>Fluxo de Caixa Projetado</option>
+      <option>BPO Financeiro</option>
+      <option>Margem de Contribuição</option>
+      <option>Ponto de Equilíbrio</option>
+      <option>DFC (Demonstrativo de Fluxo de Caixa)</option>
+      <option>EBITDA</option>
+      <option>Gestão Financeira vs Contabilidade</option>
+      <option>Previsibilidade Financeira</option>
+      <option>Estrutura Financeira Profissional</option>
+      <option>Outro (descreva abaixo)</option>
+    </select>
+    <input type="text" id="temaCustom" placeholder="Descreva o tema aqui..." style="display:none; margin-top:8px;" />
+  </div>
+
+  <div class="card" id="reelOpts">
+    <span class="lbl">Tipo de gancho</span>
+    <select id="ganchoSelect">
+      <option>Automático (o agente escolhe)</option>
+      <option>Crença quebrada</option>
+      <option>Dado chocante</option>
+      <option>Comparativo (dois personagens)</option>
+      <option>Alerta disfarçado</option>
+      <option>Paradoxo chocante</option>
+      <option>Pergunta espelho</option>
+      <option>Notícia + realidade</option>
+      <option>Storytelling de cliente</option>
+    </select>
+  </div>
+
+  <div class="card" id="carrosselOpts" style="display:none;">
+    <span class="lbl">Tipo de carrossel</span>
+    <select id="carrosselTipo">
+      <option>Misto (o agente decide)</option>
+      <option>Educar (explicar conceito)</option>
+      <option>Expor dor (problema do empresário)</option>
+      <option>Comparativo (certo vs errado)</option>
+      <option>Antes e depois</option>
+    </select>
+    <span class="lbl lbl-mt">Número de slides</span>
+    <select id="numSlides">
+      <option value="5">5 slides</option>
+      <option value="7" selected>7 slides</option>
+      <option value="10">10 slides</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Contexto adicional (opcional)</span>
+    <textarea id="contextoExtra" rows="2" placeholder="Ex: focar em empresa de e-commerce, usar caso de cliente de serviços..."></textarea>
+  </div>
+
+  <div class="erro" id="erroBox"></div>
+  <button class="gerar-btn" id="gerarBtn" onclick="gerar()">Gerar conteúdo</button>
+
+  <div class="res-card" id="resultado">
+    <div class="res-header">
+      <span class="res-lbl" id="resLbl">Resultado</span>
+      <div>
+        <button class="act-btn" id="copiarBtn" onclick="copiar()">Copiar</button>
+        <button class="act-btn" onclick="limpar()">Limpar</button>
+      </div>
+    </div>
+    <div id="resConteudo"></div>
+  </div>
+
+  <div class="rodape">Agente exclusivo Groubee, desenvolvido por Grupo Liverse</div>
+</div>
+
+<script>
+let modo = "reel";
+let rawTexto = "";
+
+const SYSTEM_REEL = `Você é especialista em conteúdo B2B para a Groubee, empresa de BPO Financeiro e Consultoria Estratégica. Cria roteiros de Reels de 60 segundos para Instagram e TikTok, apresentados pelo Guilherme, fundador da Groubee.
+
+SOBRE A GROUBEE:
+Parceiro financeiro estratégico com três camadas: Operação (contas a pagar/receber, conciliação, inadimplência), Gestão (DRE, fluxo de caixa, dashboards, indicadores), Consultoria estratégica (reuniões mensais, análise de margem, previsibilidade).
+
+REGRAS DE TOM:
+- Natural, como conversa entre dois empresários
+- Direto e técnico, sem jargão excessivo
+- Nunca robótico, nunca genérico, nunca soa como IA
+- Nunca use travessão (—), use vírgula no lugar
+- Nunca comece com saudação
+- Nunca faça pitch direto de produto
+- Nunca termine com chamada para ação direta
+- Use analogias simples sempre que possível
+
+TIPOS DE GANCHO:
+1. Crença quebrada: enuncia crença comum e derruba. Ex: "Sua empresa não precisa de fluxo de caixa. Foi isso que me disseram. E eu quase quebrei acreditando nisso."
+2. Dado chocante: abre com número real impactante. Ex: "31% das empresas ativas no Brasil estão inadimplentes hoje."
+3. Comparativo: dois personagens, mesma situação, resultados opostos.
+4. Alerta disfarçado: tom de aviso. Ex: "Cuidado com isso."
+5. Paradoxo chocante: situação impossível mas real. Ex: "Sua empresa pode estar lucrativa agora e quebrar nos próximos 60 dias."
+6. Pergunta espelho: pergunta que o empresário demora para responder.
+7. Notícia + realidade: referencia dado ou manchete real do mercado.
+8. Storytelling de cliente: abre com situação real de cliente.
+
+ESTRUTURA OBRIGATÓRIA:
+01. GANCHO (0s a 8s): Provoca. Cria tensão. Nunca explica.
+02. PROBLEMA / DESENVOLVIMENTO (8s a 40s): Dado, analogia ou caso real.
+03. VIRADA (40s a 52s): Ancora o problema em algo concreto.
+04. FECHAMENTO (52s a 60s): Última frase bate de volta na primeira. Sem CTA.
+
+DADOS REAIS:
+- 7,2 milhões de empresas inadimplentes em 2025 (31% dos ativos)
+- 48% fecham por falta de planejamento financeiro (Sebrae)
+- Insolvências cresceram 28% em 2025
+- Empresas encerraram 2025 com R$ 213 bilhões em dívidas (Serasa)
+- Selic em 14,75%, maior nível desde 2006
+- 973 mil empresas encerraram atividades no 1º quadrimestre de 2025
+
+FORMATO DE SAÍDA OBRIGATÓRIO:
+TEMA: [tema]
+GANCHO UTILIZADO: [tipo]
+
+(instrução de direção para o gancho)
+[GANCHO — 0s a 8s]
+texto do gancho
+
+(instrução de direção para o desenvolvimento)
+[PROBLEMA / DESENVOLVIMENTO — 8s a 40s]
+texto do desenvolvimento
+
+(instrução de direção para a virada)
+[VIRADA — 40s a 52s]
+texto da virada
+
+(instrução de direção para o fechamento)
+[FECHAMENTO — 52s a 60s]
+texto do fechamento
+
+NOTA DE GRAVAÇÃO:
+dica prática específica para este vídeo`;
+
+const SYSTEM_CARROSSEL = `Você é especialista em conteúdo B2B para a Groubee, empresa de BPO Financeiro e Consultoria Estratégica. Cria carrosséis para Instagram.
+
+SOBRE A GROUBEE:
+Parceiro financeiro estratégico com três camadas: Operação, Gestão e Consultoria estratégica.
+
+REGRAS DE TOM:
+- Natural, direto, sem jargão excessivo
+- Nunca use travessão (—), use vírgula no lugar
+- Linguagem de empresário para empresário
+- Sem pitch direto, a venda é sempre indireta
+- Cada slide = uma ideia, máximo 3 linhas de corpo
+- Use analogias simples sempre que possível
+
+ESTRUTURA:
+- Slide 1 (capa): gancho forte como título + subtítulo curto
+- Slides intermediários: desenvolvimento, uma ideia por slide
+- Slide final: fechamento que fecha o círculo com o slide 1
+
+DADOS REAIS:
+- 7,2 milhões de empresas inadimplentes em 2025 (31% dos ativos)
+- 48% fecham por falta de planejamento financeiro (Sebrae)
+- R$ 213 bilhões em dívidas no encerramento de 2025 (Serasa)
+- Insolvências cresceram 28% em 2025
+
+FORMATO DE SAÍDA OBRIGATÓRIO:
+TEMA: [tema]
+TIPO: [tipo]
+TOTAL DE SLIDES: [número]
+
+--- SLIDE 1 (CAPA) ---
+TÍTULO: texto
+SUBTÍTULO: texto
+
+--- SLIDE 2 ---
+TÍTULO: texto
+CORPO: texto
+
+[continua para cada slide]
+
+--- SLIDE FINAL ---
+TÍTULO: texto
+CORPO: texto que fecha o círculo
+
+NOTA PARA O DESIGNER:
+instrução visual relevante`;
+
+function setModo(m) {
+  modo = m;
+  document.getElementById("btnReel").classList.toggle("ativo", m === "reel");
+  document.getElementById("btnCarrossel").classList.toggle("ativo", m === "carrossel");
+  document.getElementById("reelOpts").style.display = m === "reel" ? "block" : "none";
+  document.getElementById("carrosselOpts").style.display = m === "carrossel" ? "block" : "none";
+  document.getElementById("resultado").style.display = "none";
+}
+
+function onTema() {
+  const v = document.getElementById("temaSelect").value;
+  document.getElementById("temaCustom").style.display = v === "Outro (descreva abaixo)" ? "block" : "none";
+}
+
+async function gerar() {
+  const temaSelect = document.getElementById("temaSelect").value;
+  const temaCustom = document.getElementById("temaCustom").value.trim();
+  const tema = temaSelect === "Outro (descreva abaixo)" ? temaCustom : temaSelect;
+  const contexto = document.getElementById("contextoExtra").value.trim();
+  const erroBox = document.getElementById("erroBox");
+
+  if (!tema) {
+    erroBox.textContent = "Selecione ou descreva um tema antes de gerar.";
+    erroBox.style.display = "block";
+    return;
+  }
+  erroBox.style.display = "none";
+
+  const btn = document.getElementById("gerarBtn");
+  btn.disabled = true;
+  btn.textContent = "Gerando conteúdo...";
+  document.getElementById("resultado").style.display = "none";
+
+  let systemMsg, userMsg;
+
+  if (modo === "reel") {
+    const gancho = document.getElementById("ganchoSelect").value;
+    systemMsg = SYSTEM_REEL;
+    userMsg = `Crie um roteiro de Reel para a Groubee.\nTEMA: ${tema}\nTIPO DE GANCHO: ${gancho}${contexto ? "\nCONTEXTO ADICIONAL: " + contexto : ""}`;
+  } else {
+    const tipo = document.getElementById("carrosselTipo").value;
+    const slides = document.getElementById("numSlides").value;
+    systemMsg = SYSTEM_CARROSSEL;
+    userMsg = `Crie um carrossel para a Groubee.\nTEMA: ${tema}\nTIPO: ${tipo}\nNÚMERO DE SLIDES: ${slides}${contexto ? "\nCONTEXTO ADICIONAL: " + contexto : ""}`;
+  }
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1500,
+        system: systemMsg,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+    const data = await res.json();
+    rawTexto = data.content?.map(b => b.text || "").join("") || "";
+    if (!rawTexto) throw new Error("Sem resposta");
+    renderResultado(rawTexto);
+  } catch(e) {
+    erroBox.textContent = "Erro ao gerar. Tente novamente.";
+    erroBox.style.display = "block";
+  }
+
+  btn.disabled = false;
+  btn.textContent = `Gerar ${modo === "reel" ? "Roteiro de Reel" : "Carrossel"}`;
+}
+
+function renderResultado(texto) {
+  const div = document.getElementById("resConteudo");
+  div.innerHTML = "";
+  document.getElementById("resLbl").textContent = modo === "reel" ? "Roteiro gerado" : "Carrossel gerado";
+
+  texto.split("\n").forEach(linha => {
+    const el = document.createElement("div");
+    if (!linha.trim()) { el.className = "gap"; }
+    else if (linha.startsWith("--- SLIDE")) { el.className = "slide-tag"; el.textContent = linha.replace(/---/g,"").trim(); }
+    else if (linha.startsWith("[") && linha.endsWith("]")) { el.className = "bloco-tag"; el.textContent = linha; }
+    else if (linha.startsWith("(") && linha.endsWith(")")) { el.className = "instrucao"; el.textContent = linha; }
+    else if (/^(TEMA:|TIPO:|GANCHO|TOTAL|NOTA)/.test(linha)) { el.className = "meta"; el.textContent = linha; }
+    else if (/^(TÍTULO:|SUBTÍTULO:)/.test(linha)) { el.className = "tit"; el.textContent = linha; }
+    else if (linha.startsWith("CORPO:")) { el.className = "corpo"; el.textContent = linha; }
+    else { el.className = "fala"; el.textContent = linha; }
+    div.appendChild(el);
+  });
+
+  document.getElementById("resultado").style.display = "block";
+  document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function copiar() {
+  navigator.clipboard.writeText(rawTexto).then(() => {
+    const b = document.getElementById("copiarBtn");
+    b.textContent = "Copiado!";
+    b.classList.add("ok");
+    setTimeout(() => { b.textContent = "Copiar"; b.classList.remove("ok"); }, 2000);
+  });
+}
+
+function limpar() {
+  document.getElementById("resultado").style.display = "none";
+  document.getElementById("temaSelect").value = "";
+  document.getElementById("temaCustom").style.display = "none";
+  document.getElementById("temaCustom").value = "";
+  document.getElementById("contextoExtra").value = "";
+  document.getElementById("erroBox").style.display = "none";
+  rawTexto = "";
+}
+</script>
+</body>
+</html>
